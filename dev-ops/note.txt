@@ -1,0 +1,11 @@
+Note for dev ops
+Build: mvn clean package -Dmaven.test.skip
+
+
+CREATE DATABASE db_springboot_base CHARACTER SET utf8;
+CREATE USER 'db_base_usr' IDENTIFIED BY 'db_base_usr@123';
+CREATE USER 'db_base_usr'@'localhost' IDENTIFIED BY 'db_base_usr@123';
+
+GRANT ALL PRIVILEGES ON db_springboot_base.* TO 'db_base_usr';
+FLUSH PRIVILEGES;
+
