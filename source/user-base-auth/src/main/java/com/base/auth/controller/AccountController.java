@@ -2,6 +2,7 @@ package com.base.auth.controller;
 
 
 import com.base.auth.constant.UserBaseConstant;
+import com.base.auth.dto.ApiMessageDto;
 import com.base.auth.dto.account.AccountDto;
 import com.base.auth.dto.account.ForgetPasswordDto;
 import com.base.auth.dto.account.RequestForgetPasswordForm;
@@ -17,6 +18,7 @@ import com.base.auth.model.Service;
 import com.base.auth.model.User;
 import com.base.auth.model.criteria.AccountCriteria;
 import com.base.auth.repository.*;
+import com.base.auth.service.TokenService;
 import com.base.auth.service.UserBaseApiService;
 import com.base.auth.utils.AESUtils;
 import com.base.auth.utils.ConvertUtils;
@@ -65,6 +67,9 @@ public class AccountController extends ABasicController{
 
     @Autowired
     ServiceRepository serviceRepository;
+
+    @Autowired
+    TokenService tokenService;
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ACC_L')")
@@ -310,5 +315,13 @@ public class AccountController extends ABasicController{
         apiMessageDto.setResult(true);
         apiMessageDto.setMessage("Change password success.");
         return  apiMessageDto;
+    }
+
+    @DeleteMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiMessageDto<String> logout(){
+        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
+        tokenService.revokeRefreshToken();
+        apiMessageDto.setMessage("Logout success");
+        return apiMessageDto;
     }
 }
