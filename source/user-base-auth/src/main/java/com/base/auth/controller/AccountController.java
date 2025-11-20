@@ -1,6 +1,5 @@
 package com.base.auth.controller;
 
-
 import com.base.auth.constant.UserBaseConstant;
 import com.base.auth.dto.ApiMessageDto;
 import com.base.auth.dto.account.AccountDto;
@@ -15,10 +14,9 @@ import com.base.auth.mapper.AccountMapper;
 import com.base.auth.model.Account;
 import com.base.auth.model.Group;
 import com.base.auth.model.Service;
-import com.base.auth.model.User;
 import com.base.auth.model.criteria.AccountCriteria;
 import com.base.auth.repository.*;
-import com.base.auth.service.TokenService;
+import com.base.auth.service.RedisService;
 import com.base.auth.service.UserBaseApiService;
 import com.base.auth.utils.AESUtils;
 import com.base.auth.utils.ConvertUtils;
@@ -69,7 +67,7 @@ public class AccountController extends ABasicController{
     ServiceRepository serviceRepository;
 
     @Autowired
-    TokenService tokenService;
+    RedisService redisService;
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ACC_L')")
@@ -320,7 +318,7 @@ public class AccountController extends ABasicController{
     @DeleteMapping(value = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<String> logout(){
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-        tokenService.revokeRefreshToken();
+        redisService.logout();
         apiMessageDto.setMessage("Logout success");
         return apiMessageDto;
     }

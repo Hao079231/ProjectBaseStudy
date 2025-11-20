@@ -23,6 +23,9 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Autowired
     JsonToUrlEncodedAuthenticationFilter jsonFilter;
 
+    @Autowired
+    AccessTokenBlacklistFilter accessTokenBlacklistFilter;
+
     @Bean
     public DefaultTokenServices createTokenServices() {
         DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
@@ -33,7 +36,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.addFilterAfter(jsonFilter, BasicAuthenticationFilter.class)
+        http.addFilterBefore(accessTokenBlacklistFilter, BasicAuthenticationFilter.class)
+            .addFilterAfter(jsonFilter, BasicAuthenticationFilter.class)
                 .requestMatchers()
                 .and()
                 .authorizeRequests()
