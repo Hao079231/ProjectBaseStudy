@@ -8,6 +8,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -17,6 +18,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class AccessTokenBlacklistFilter extends OncePerRequestFilter {
+  @Value("${spring.global.version}")
+  private int globalVersion;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request,
@@ -32,7 +35,7 @@ public class AccessTokenBlacklistFilter extends OncePerRequestFilter {
           UserBaseJwt userBaseJwt = UserBaseJwt.decode(encodedData);
           if (userBaseJwt != null) {
             Integer tokenGlobalVersion = (Integer) map.get("global_version");
-            if (!Objects.equals(tokenGlobalVersion, SecurityConstant.GLOBAL_VERSION)) {
+            if (!Objects.equals(tokenGlobalVersion, globalVersion)) {
               response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token revoked");
               return;
             }

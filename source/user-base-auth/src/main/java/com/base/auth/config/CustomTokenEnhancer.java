@@ -1,12 +1,11 @@
 package com.base.auth.config;
 
-import com.base.auth.constant.UserBaseConstant;
 import com.base.auth.dto.AccountForTokenDto;
-import com.base.auth.dto.UserForTokenDto;
 import com.base.auth.model.Permission;
 import com.base.auth.utils.ZipUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
@@ -24,9 +23,12 @@ public class CustomTokenEnhancer implements TokenEnhancer {
 
     private ObjectMapper objectMapper;
 
-    public CustomTokenEnhancer(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+    private int globalVersion;
+
+    public CustomTokenEnhancer(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, int globalVersion) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
+        this.globalVersion = globalVersion;
     }
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken accessToken, OAuth2Authentication authentication) {
@@ -64,7 +66,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
             additionalInfo.put("user_kind", a.getKind());
             additionalInfo.put("grant_type", grantType == null ? SecurityConstant.GRANT_TYPE_PASSWORD : grantType);
             additionalInfo.put("tenant_info", tenantId);
-            additionalInfo.put("global_version", SecurityConstant.GLOBAL_VERSION);
+            additionalInfo.put("global_version", globalVersion);
             String DELIM = "|";
             String additionalInfoStr = ZipUtils.zipString(userId + DELIM
                     + storeId + DELIM
@@ -101,7 +103,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
             additionalInfo.put("user_kind", a.getKind());
             additionalInfo.put("grant_type", grantType);
             additionalInfo.put("tenant_info", tenantId);
-            additionalInfo.put("global_version", SecurityConstant.GLOBAL_VERSION);
+            additionalInfo.put("global_version", globalVersion);
             String DELIM = "|";
             String additionalInfoStr = ZipUtils.zipString(accountId + DELIM
                     + storeId + DELIM

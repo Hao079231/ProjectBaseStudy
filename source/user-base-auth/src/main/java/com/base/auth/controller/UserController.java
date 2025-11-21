@@ -1,18 +1,14 @@
 package com.base.auth.controller;
 
-import com.base.auth.config.SecurityConstant;
 import com.base.auth.constant.UserBaseConstant;
 import com.base.auth.dto.ApiMessageDto;
 import com.base.auth.dto.ErrorCode;
 import com.base.auth.dto.ResponseListDto;
 import com.base.auth.dto.user.UserAutoCompleteDto;
 import com.base.auth.dto.user.UserDto;
-import com.base.auth.exception.NotFoundException;
-import com.base.auth.exception.UnauthorizationException;
 import com.base.auth.form.user.SignUpUserForm;
 import com.base.auth.form.user.LoginForm;
 import com.base.auth.form.user.UpdateUserForm;
-import com.base.auth.form.user.UserIdForm;
 import com.base.auth.mapper.AccountMapper;
 import com.base.auth.mapper.UserMapper;
 import com.base.auth.model.Account;
@@ -22,7 +18,6 @@ import com.base.auth.model.criteria.UserCriteria;
 import com.base.auth.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +36,7 @@ import java.util.List;
 @RequestMapping("/v1/user")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @Slf4j
-public class UserController extends ABasicController{
+public class UserController {
 
     @Autowired
     private UserRepository userRepository;
@@ -242,26 +237,6 @@ public class UserController extends ABasicController{
         accountMapper.fromUpdateUserFormToEntity(updateUserForm,account);
         accountRepository.save(account);
         apiMessageDto.setMessage("update success");
-        return apiMessageDto;
-    }
-
-    @PutMapping(value = "/block", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("hasRole('US_BL')")
-    public ApiMessageDto<String> block(@RequestBody @Valid UserIdForm userId, BindingResult bindingResult){
-        if (!isSuperAdmin()){
-            throw new UnauthorizationException("Not allowed block user");
-        }
-        ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-        User user = userRepository.findById(userId.getId()).orElseThrow(()
-            -> new NotFoundException("User not found"));
-        Account account = user.getAccount();
-        if (account == null){
-            throw new NotFoundException("Account not found");
-        }
-        account.setStatus(UserBaseConstant.STATUS_LOCK);
-        accountRepository.save(account);
-        SecurityConstant.GLOBAL_VERSION++;
-        apiMessageDto.setMessage("Block user success");
         return apiMessageDto;
     }
 }
