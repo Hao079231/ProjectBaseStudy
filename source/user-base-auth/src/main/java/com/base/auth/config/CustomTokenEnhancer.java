@@ -64,6 +64,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
             additionalInfo.put("user_kind", a.getKind());
             additionalInfo.put("grant_type", grantType == null ? SecurityConstant.GRANT_TYPE_PASSWORD : grantType);
             additionalInfo.put("tenant_info", tenantId);
+            additionalInfo.put("global_version", SecurityConstant.GLOBAL_VERSION);
             String DELIM = "|";
             String additionalInfoStr = ZipUtils.zipString(userId + DELIM
                     + storeId + DELIM
@@ -100,6 +101,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
             additionalInfo.put("user_kind", a.getKind());
             additionalInfo.put("grant_type", grantType);
             additionalInfo.put("tenant_info", tenantId);
+            additionalInfo.put("global_version", SecurityConstant.GLOBAL_VERSION);
             String DELIM = "|";
             String additionalInfoStr = ZipUtils.zipString(accountId + DELIM
                     + storeId + DELIM

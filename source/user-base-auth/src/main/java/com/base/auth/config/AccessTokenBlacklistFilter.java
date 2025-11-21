@@ -1,12 +1,15 @@
 package com.base.auth.config;
 
-import com.base.auth.service.RedisService;
+import com.base.auth.constant.UserBaseConstant;
+import com.base.auth.jwt.UserBaseJwt;
+import com.base.auth.repository.AccountRepository;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -17,9 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class AccessTokenBlacklistFilter extends OncePerRequestFilter {
 
-  @Autowired
-  RedisService redisService;
-
   @Override
   protected void doFilterInternal(HttpServletRequest request,
       HttpServletResponse response, FilterChain filterChain)
@@ -28,10 +28,17 @@ public class AccessTokenBlacklistFilter extends OncePerRequestFilter {
     if (auth instanceof OAuth2Authentication) {
       OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) auth.getDetails();
       if (details != null) {
-        String tokenValue = details.getTokenValue();
-        if (tokenValue != null && redisService.isBlacklisted(tokenValue)) {
-          response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token revoked");
-          return;
+        Map<String, Object> map = (Map<String, Object>) details.getDecodedDetails();
+        String encodedData = (String) map.get("additional_info");
+        if (encodedData != null && !encodedData.isEmpty()) {
+          UserBaseJwt userBaseJwt = UserBaseJwt.decode(encodedData);
+          if (userBaseJwt != null){
+            Integer tokenGlobalVersion = (Integer) map.get("global_version");
+            if (!Objects.equals(tokenGlobalVersion, SecurityConstant.GLOBAL_VERSION)){
+              response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token revoked");
+              return;
+            }
+          }
         }
       }
     }

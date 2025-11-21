@@ -5,5 +5,5 @@ public class SecurityConstant {
     public static final String GRANT_TYPE_USER = "user";
 
     // Redis prefix
-    public static final String REDIS_PREFIX = "auth:blacklist:access:";
+    public static volatile int GLOBAL_VERSION = 1;
 }
