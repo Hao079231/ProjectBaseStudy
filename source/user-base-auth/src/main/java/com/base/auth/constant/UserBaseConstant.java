@@ -31,6 +31,9 @@ public class UserBaseConstant {
 
     public static final Integer CATEGORY_KIND_NEWS = 1;
 
+    public static final Boolean MFA_ENABLE = true;
+    public static final Boolean MFA_DISABLE = false;
+
     private UserBaseConstant(){
         throw new IllegalStateException("Utility class");
     }

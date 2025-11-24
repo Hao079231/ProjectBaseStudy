@@ -22,4 +22,6 @@ public class User extends Auditable<String>{
     @OneToOne
     @JoinColumn(name = "account_id")
     private Account account;
+    private Boolean mfaEnabled = false;
+    private String mfaSecretKey;
 }
