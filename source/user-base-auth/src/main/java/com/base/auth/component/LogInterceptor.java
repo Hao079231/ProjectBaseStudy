@@ -17,13 +17,9 @@ public class LogInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) {
-        if (DispatcherType.REQUEST.name().equals(request.getDispatcherType().name())
-                && request.getMethod().equals(HttpMethod.GET.name())) {
-
-        }
         long startTime = System.currentTimeMillis();
         request.setAttribute("startTime", startTime);
-        log.debug("Starting call url: [" + getUrl(request) + "]");
+        log.info("Starting call url: [" + getUrl(request) + "], startTime : " + startTime + "ms");
         return true;
     }
 
@@ -34,7 +30,8 @@ public class LogInterceptor implements HandlerInterceptor {
         long startTime = (Long) request.getAttribute("startTime");
         long endTime = System.currentTimeMillis();
         long executeTime = endTime - startTime;
-        log.debug("Complete [" + getUrl(request) + "] executeTime : " + executeTime + "ms");
+        log.info("Complete [" + getUrl(request) + "] endTime : " + endTime + "ms");
+        log.info("executeTime : " + executeTime + "ms");
 
         if (ex != null) {
             log.error("afterCompletion>> " + ex.getMessage());
