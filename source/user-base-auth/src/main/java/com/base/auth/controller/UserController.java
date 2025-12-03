@@ -8,6 +8,7 @@ import com.base.auth.dto.user.UserAutoCompleteDto;
 import com.base.auth.dto.user.UserDto;
 import com.base.auth.exception.BadRequestException;
 import com.base.auth.exception.NotFoundException;
+import com.base.auth.form.account.AccountProfileDto;
 import com.base.auth.form.user.SignUpUserForm;
 import com.base.auth.form.user.LoginForm;
 import com.base.auth.form.user.UpdateUserForm;
@@ -41,7 +42,7 @@ import java.util.List;
 @RequestMapping("/v1/user")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @Slf4j
-public class UserController {
+public class UserController extends ABasicController{
 
     @Autowired
     private UserRepository userRepository;
@@ -287,6 +288,20 @@ public class UserController {
         user.setMfaEnabled(false);
         userRepository.save(user);
         apiMessageDto.setMessage("Restart QR code success");
+        return apiMessageDto;
+    }
+
+    @GetMapping(value = "/profile", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('US_P')")
+    public ApiMessageDto<AccountProfileDto> profile(){
+        ApiMessageDto<AccountProfileDto> apiMessageDto = new ApiMessageDto<>();
+        Account account = accountRepository.findById(getCurrentUser()).orElseThrow(()
+        -> new NotFoundException("Account not found"));
+        if (account == null){
+            throw new NotFoundException("Account not found");
+        }
+        apiMessageDto.setData(accountMapper.fromEntityToAccountProfileDto(account));
+        apiMessageDto.setMessage("Get profile success");
         return apiMessageDto;
     }
 }

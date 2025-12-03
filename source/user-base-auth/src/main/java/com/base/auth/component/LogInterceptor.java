@@ -17,24 +17,20 @@ public class LogInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object handler) {
-        if (DispatcherType.REQUEST.name().equals(request.getDispatcherType().name())
-                && request.getMethod().equals(HttpMethod.GET.name())) {
-
-        }
         long startTime = System.currentTimeMillis();
         request.setAttribute("startTime", startTime);
-        log.debug("Starting call url: [" + getUrl(request) + "]");
+        log.info("=====> Starting call url: [" + getUrl(request) + "], startTime: " + startTime + "ms");
         return true;
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
-
         long startTime = (Long) request.getAttribute("startTime");
         long endTime = System.currentTimeMillis();
         long executeTime = endTime - startTime;
-        log.debug("Complete [" + getUrl(request) + "] executeTime : " + executeTime + "ms");
+        log.info("======> Complete [" + getUrl(request) + "] endTime : " + endTime + "ms");
+        log.info("======> ExecuteTime : " + executeTime + "ms");
 
         if (ex != null) {
             log.error("afterCompletion>> " + ex.getMessage());
