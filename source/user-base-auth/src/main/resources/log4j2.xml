@@ -37,11 +37,6 @@
             <appender-ref ref="FILE" />
         </Logger>
 
-        <Logger name="com.base.auth.component.LogInterceptor" level="debug" additivity="false">
-            <appender-ref ref="FILE" />
-            <AppenderRef ref="STDOUT" />
-        </Logger>
-
         <Root level="info">
             <AppenderRef ref="FILE" />
             <AppenderRef ref="STDOUT" />

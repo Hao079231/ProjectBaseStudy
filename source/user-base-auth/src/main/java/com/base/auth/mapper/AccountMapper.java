@@ -2,6 +2,7 @@ package com.base.auth.mapper;
 
 import com.base.auth.dto.account.AccountAutoCompleteDto;
 import com.base.auth.dto.account.AccountDto;
+import com.base.auth.form.account.AccountProfileDto;
 import com.base.auth.form.user.SignUpUserForm;
 import com.base.auth.form.user.UpdateUserForm;
 import com.base.auth.model.Account;
@@ -53,6 +54,11 @@ public interface AccountMapper {
     @BeanMapping(ignoreByDefault = true)
     void fromUpdateUserFormToEntity(UpdateUserForm updateUserForm, @MappingTarget Account account );
 
-
-
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "phone", target = "phone")
+    @Mapping(source = "email", target = "email")
+    @Mapping(source = "fullName", target = "fullName")
+    @BeanMapping(ignoreByDefault = true)
+    @Named("fromEntityToAccountProfileDto")
+    AccountProfileDto fromEntityToAccountProfileDto(Account account);
 }
