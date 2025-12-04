@@ -50,6 +50,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     ObjectMapper objectMapper;
 
+    @Value("${spring.global.version}")
+    int globalVersion;
+
     @Bean
     public TokenStore tokenStore() {
         JdbcTokenStore j = new JdbcTokenStore(jdbcTemplate.getDataSource());
@@ -73,7 +76,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(new CustomTokenEnhancer(jdbcTemplate,objectMapper), accessTokenConverter()));
+        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(new CustomTokenEnhancer(jdbcTemplate,objectMapper, globalVersion), accessTokenConverter()));
         endpoints
                 .pathMapping("/oauth/authorize", "/api/authorize")
                 .pathMapping("/oauth/token", "/api/token")

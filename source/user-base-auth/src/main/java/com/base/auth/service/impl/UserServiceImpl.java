@@ -2,14 +2,16 @@ package com.base.auth.service.impl;
 
 import com.base.auth.config.SecurityConstant;
 import com.base.auth.constant.UserBaseConstant;
+import com.base.auth.exception.oauth.CustomOauthException;
 import com.base.auth.jwt.UserBaseJwt;
 import com.base.auth.model.Account;
-import com.base.auth.model.Group;
 import com.base.auth.model.User;
 import com.base.auth.repository.AccountRepository;
 import com.base.auth.repository.GroupRepository;
 import com.base.auth.repository.UserRepository;
+import com.base.auth.service.MFAService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,6 +55,9 @@ public class UserServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MFAService mfaService;
 
     @Override
     public UserDetails loadUserByUsername(String userId) {
@@ -105,28 +110,38 @@ public class UserServiceImpl implements UserDetailsService {
         responseTypes.add("code");
         Map<String, Serializable> extensionProperties = new HashMap<>();
 
-        Account user = accountRepository.findAccountByPhone(phone);
-        if(user == null || !Objects.equals(UserBaseConstant.STATUS_ACTIVE, user.getStatus())){
+        Account account = accountRepository.findAccountByPhone(phone);
+        if(account == null || !Objects.equals(UserBaseConstant.STATUS_ACTIVE, account.getStatus())){
             log.error("Invalid phone.");
             throw new UsernameNotFoundException("Invalid phone.");
         }
 
-        if(!passwordEncoder.matches(password, user.getPassword())){
+        if(!passwordEncoder.matches(password, account.getPassword())){
             log.error("Invalid password.");
             throw new UsernameNotFoundException("Invalid password.");
         }
+        User user = userRepository.findByAccountId(account.getId()).orElse(null);
+        if (user == null){
+            log.error("User not found.");
+            throw new UsernameNotFoundException("User not found.");
+        }
 
+        if (!Boolean.TRUE.equals(user.getMfaEnabled())){
+            throw new CustomOauthException("Please verify OTP");
+        }
+        user.setMfaEnabled(UserBaseConstant.MFA_DISABLE);
+        userRepository.save(user);
         boolean enabled = true;
-        if (user.getStatus() != 1) {
+        if (account.getStatus() != 1) {
             log.error("User had been locked");
             enabled = false;
         }
 
-        requestParameters.put("phone", user.getPhone());
+        requestParameters.put("phone", account.getPhone());
 
-        Set<GrantedAuthority> grantedAuthorities = getAccountPermission(user);
+        Set<GrantedAuthority> grantedAuthorities = getAccountPermission(account);
 
-        UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getPhone(), user.getPassword(), enabled, true, true, true, grantedAuthorities);
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(account.getPhone(), account.getPassword(), enabled, true, true, true, grantedAuthorities);
 
         OAuth2Request oAuth2Request = new OAuth2Request(requestParameters, clientId,
                 userDetails.getAuthorities(), approved, client.getScope(),
