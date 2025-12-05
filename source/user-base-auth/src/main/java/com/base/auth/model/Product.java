@@ -1,5 +1,6 @@
 package com.base.auth.model;
 
+import com.base.auth.component.EntityListener;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -15,7 +16,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "db_user_base_product")
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({AuditingEntityListener.class, EntityListener.class})
 @Getter
 @Setter
 public class Product extends Auditable<String>{
@@ -23,6 +24,7 @@ public class Product extends Auditable<String>{
   @GenericGenerator(name = "idGenerator", strategy = "com.base.auth.service.id.IdGenerator")
   @GeneratedValue(generator = "idGenerator")
   private Long id;
+  @Column(name = "name", unique = true)
   private String name;
   @Column(name = "description" ,  columnDefinition = "TEXT")
   private String description;

@@ -96,12 +96,6 @@ public class CategoryController extends ABasicController {
     @PreAuthorize("hasRole('CA_C')")
     public ApiMessageDto<String> createCategory(@Valid @RequestBody CreateCategoryForm createCategoryForm, BindingResult bindingResult) {
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-        Category categoryCheckName = categoryRepository.findByName(createCategoryForm.getName());
-        if (categoryCheckName != null) {
-            apiMessageDto.setResult(false);
-            apiMessageDto.setCode(ErrorCode.CATEGORY_ERROR_EXIST);
-            return apiMessageDto;
-        }
         categoryRepository.save(categoryMapper.fromCreateCategory(createCategoryForm));
         apiMessageDto.setMessage("Create category success");
         return apiMessageDto;

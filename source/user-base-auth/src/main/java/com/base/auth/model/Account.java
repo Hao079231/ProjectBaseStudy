@@ -1,5 +1,6 @@
 package com.base.auth.model;
 
+import com.base.auth.component.EntityListener;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "db_user_base_account")
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({AuditingEntityListener.class, EntityListener.class})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,8 +25,11 @@ public class Account extends Auditable<String> {
     @GeneratedValue(generator = "idGenerator")
     private Long id;
     private int kind;
+    @Column(name = "username", unique = true)
     private String username;
+    @Column(name = "phone", unique = true)
     private String phone;
+    @Column(name = "email", unique = true)
     private String email;
     @JsonIgnore
     private String password;
