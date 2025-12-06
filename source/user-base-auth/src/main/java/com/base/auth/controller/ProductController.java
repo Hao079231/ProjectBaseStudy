@@ -77,7 +77,7 @@ public class ProductController extends ABasicController{
   @PreAuthorize("hasRole('PR_U')")
   public ApiMessageDto<String> update(@Valid @RequestBody UpdateProductForm updateProductForm, BindingResult bindingResult){
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-    Product product = productRepository.findById(updateProductForm.getId()).orElseThrow(null);
+    Product product = productRepository.findById(updateProductForm.getId()).orElse(null);
     Category category = categoryRepository.findById(updateProductForm.getCategoryId()).orElse(null);
     productMapper.fromUpdateProductFormToEntity(updateProductForm, product);
     product.setCategory(category);
