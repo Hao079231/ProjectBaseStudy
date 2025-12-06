@@ -24,7 +24,7 @@ public class Product extends Auditable<String>{
   @GenericGenerator(name = "idGenerator", strategy = "com.base.auth.service.id.IdGenerator")
   @GeneratedValue(generator = "idGenerator")
   private Long id;
-  @Column(name = "name", unique = true)
+  @Column(name = "name", unique = true, nullable = false)
   private String name;
   @Column(name = "description" ,  columnDefinition = "TEXT")
   private String description;
@@ -34,6 +34,6 @@ public class Product extends Auditable<String>{
   private Integer stock;
   private String thumbnailUrl;
   @ManyToOne
-  @JoinColumn(name = "category_id")
+  @JoinColumn(name = "category_id", nullable = false)
   private Category category;
 }

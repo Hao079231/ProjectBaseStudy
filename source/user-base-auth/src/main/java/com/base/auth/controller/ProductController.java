@@ -49,8 +49,7 @@ public class ProductController extends ABasicController{
   @PreAuthorize("hasRole('PR_C')")
   public ApiMessageDto<String> create(@Valid @RequestBody CreateProductForm createProductForm, BindingResult bindingResult){
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-    Category category = categoryRepository.findById(createProductForm.getCategoryId()).orElseThrow(()
-    -> new NotFoundException("Category not found"));
+    Category category = categoryRepository.findById(createProductForm.getCategoryId()).orElse(null);
     Product product = productMapper.fromCreateProductFormToEntity(createProductForm);
     Double finalPrice = createProductForm.getPrice() * (createProductForm.getDiscount() / 100);
     product.setFinalPrice(finalPrice);
