@@ -1,5 +1,6 @@
 package com.base.auth.model;
 
+import com.base.auth.component.EntityListener;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
@@ -10,7 +11,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({AuditingEntityListener.class, EntityListener.class})
 @Table(name = "db_user_base_address")
 public class Address extends Auditable<String>{
     @Id
