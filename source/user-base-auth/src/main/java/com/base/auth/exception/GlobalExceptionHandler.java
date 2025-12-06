@@ -119,6 +119,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({ DataAccessException.class})
     public ResponseEntity<ApiMessageDto<String>> databaseError(DataAccessException ex) {
+        log.error("====> " + ex.getMessage());
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
         apiMessageDto.setResult(false);
         apiMessageDto.setMessage("Database Error");

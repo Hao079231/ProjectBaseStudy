@@ -39,6 +39,7 @@ public interface AccountMapper {
     @IterableMapping(elementTargetType = AccountAutoCompleteDto.class)
     List<AccountAutoCompleteDto> convertAccountToAutoCompleteDto(List<Account> list);
 
+    @Mapping(source = "username", target = "username")
     @Mapping(source = "phone", target = "phone")
     @Mapping(source = "email", target = "email")
     @Mapping(source = "fullName", target = "fullName")

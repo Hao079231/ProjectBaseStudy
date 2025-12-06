@@ -6,13 +6,14 @@ import lombok.Data;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
 @ApiModel
 public class SignUpUserForm {
-
+    @ApiModelProperty(name = "username")
+    @NotEmpty(message = "username cannot be null")
+    private String username;
     @ApiModelProperty(name = "email")
     @Email
     private String email;

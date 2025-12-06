@@ -69,27 +69,6 @@ public class UserController extends ABasicController{
     public ApiMessageDto<String> create(@Valid @RequestBody SignUpUserForm signUpUserForm, BindingResult bindingResult)
     {
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-
-            Account accountByPhone = accountRepository.findAccountByPhone(signUpUserForm.getPhone());
-            if (accountByPhone!=null)
-            {
-                apiMessageDto.setMessage("phone number already exists");
-                apiMessageDto.setCode(ErrorCode.USER_ERROR_EXIST);
-                apiMessageDto.setResult(false);
-                return apiMessageDto;
-            }
-
-        if (signUpUserForm.getEmail()!=null)
-        {
-            Account accountByEmail = accountRepository.findAccountByEmail(signUpUserForm.getEmail());
-            if (accountByEmail!=null)
-            {
-                apiMessageDto.setMessage("email already exists");
-                apiMessageDto.setCode(ErrorCode.USER_ERROR_EXIST);
-                apiMessageDto.setResult(false);
-                return apiMessageDto;
-            }
-        }
         Account account = accountMapper.fromSignUpUserToAccount(signUpUserForm);
         account.setPassword(passwordEncoder.encode(signUpUserForm.getPassword()));
         account.setKind(UserBaseConstant.USER_KIND_USER);
