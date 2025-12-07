@@ -9,7 +9,6 @@ import com.base.auth.dto.user.UserDto;
 import com.base.auth.exception.BadRequestException;
 import com.base.auth.exception.NotFoundException;
 import com.base.auth.form.account.AccountProfileDto;
-import com.base.auth.form.facebook.FacebookLoginForm;
 import com.base.auth.form.user.SignUpUserForm;
 import com.base.auth.form.user.LoginForm;
 import com.base.auth.form.user.UpdateUserForm;
@@ -33,7 +32,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -288,19 +286,5 @@ public class UserController extends ABasicController{
         apiMessageDto.setData(accountMapper.fromEntityToAccountProfileDto(account));
         apiMessageDto.setMessage("Get profile success");
         return apiMessageDto;
-    }
-
-    @PostMapping(value = "/facebook-login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiMessageDto<OAuth2AccessToken> facebookLogin(@Valid @RequestBody FacebookLoginForm facebookLoginForm, BindingResult bindingResult) {
-        ApiMessageDto<OAuth2AccessToken> apiMessageDto = new ApiMessageDto<>();
-        try{
-            OAuth2AccessToken token = faceBookService.loginWithFacebook(facebookLoginForm);
-            apiMessageDto.setData(token);
-            apiMessageDto.setMessage("Facebook login success");
-            return apiMessageDto;
-        }catch (Exception e){
-            log.error("===> Facebook login error: {}", e.getMessage());
-            throw new BadRequestException("Facebook login failed: " + e.getMessage());
-        }
     }
 }

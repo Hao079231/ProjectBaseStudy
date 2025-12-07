@@ -64,6 +64,9 @@ public class UserServiceImpl implements UserDetailsService {
     @Autowired
     private MFAService mfaService;
 
+    @Autowired
+    private FaceBookService faceBookService;
+
     @Override
     public UserDetails loadUserByUsername(String userId) {
         Account user = accountRepository.findAccountByUsername(userId);
@@ -157,7 +160,13 @@ public class UserServiceImpl implements UserDetailsService {
         return tokenServices.createAccessToken(auth);
     }
 
-    public OAuth2AccessToken getAccessTokenForFacebook(ClientDetails client, TokenRequest tokenRequest, Account account, AuthorizationServerTokenServices tokenServices) throws GeneralSecurityException, IOException {
+    public OAuth2AccessToken getAccessTokenForFacebook(ClientDetails client, TokenRequest tokenRequest, String accessToken, AuthorizationServerTokenServices tokenServices) throws GeneralSecurityException, IOException {
+        FacebookUserInfo userInfo = faceBookService.verifyToken(accessToken);
+        Account account = accountRepository.findAccountByUsername(userInfo.getId());
+        if (account == null){
+            account = faceBookService.createAccountFromFacebook(userInfo);
+        }
+
         Map<String, String> requestParameters = new HashMap<>();
         requestParameters.put("grantType", SecurityConstant.GRANT_TYPE_FACEBOOK);
         Set<String> responseTypes = new HashSet<>();
