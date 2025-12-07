@@ -2,6 +2,7 @@ package com.base.auth.service.impl;
 
 import com.base.auth.config.SecurityConstant;
 import com.base.auth.constant.UserBaseConstant;
+import com.base.auth.dto.facebook.FacebookUserInfo;
 import com.base.auth.exception.oauth.CustomOauthException;
 import com.base.auth.jwt.UserBaseJwt;
 import com.base.auth.model.Account;
@@ -9,10 +10,13 @@ import com.base.auth.model.User;
 import com.base.auth.repository.AccountRepository;
 import com.base.auth.repository.GroupRepository;
 import com.base.auth.repository.UserRepository;
+import com.base.auth.service.FaceBookService;
 import com.base.auth.service.MFAService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -25,6 +29,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.ClientDetails;
+import org.springframework.security.oauth2.provider.ClientDetailsService;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.TokenRequest;
@@ -146,6 +151,30 @@ public class UserServiceImpl implements UserDetailsService {
         OAuth2Request oAuth2Request = new OAuth2Request(requestParameters, clientId,
                 userDetails.getAuthorities(), approved, client.getScope(),
                 client.getResourceIds(), null, responseTypes, extensionProperties);
+        org.springframework.security.core.userdetails.User userPrincipal = new org.springframework.security.core.userdetails.User(userDetails.getUsername(), userDetails.getPassword(), userDetails.isEnabled(), userDetails.isAccountNonExpired(), userDetails.isCredentialsNonExpired(), userDetails.isAccountNonLocked(), userDetails.getAuthorities());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userPrincipal, null, userDetails.getAuthorities());
+        OAuth2Authentication auth = new OAuth2Authentication(oAuth2Request, authenticationToken);
+        return tokenServices.createAccessToken(auth);
+    }
+
+    public OAuth2AccessToken getAccessTokenForFacebook(ClientDetails client, TokenRequest tokenRequest, Account account, AuthorizationServerTokenServices tokenServices) throws GeneralSecurityException, IOException {
+        Map<String, String> requestParameters = new HashMap<>();
+        requestParameters.put("grantType", SecurityConstant.GRANT_TYPE_FACEBOOK);
+        Set<String> responseTypes = new HashSet<>();
+        responseTypes.add("code");
+        Map<String, Serializable> extensionProperties = new HashMap<>();
+        if (!Objects.equals(account.getStatus(), UserBaseConstant.STATUS_ACTIVE)) {
+            log.error("User had been locked");
+            throw new CustomOauthException("Account is not active");
+        }
+
+        Set<GrantedAuthority> grantedAuthorities = getAccountPermission(account);
+
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(account.getUsername(), "N/A", true, true, true, true, grantedAuthorities);
+
+        OAuth2Request oAuth2Request = new OAuth2Request(requestParameters, client.getClientId(),
+            userDetails.getAuthorities(), true, client.getScope(),
+            client.getResourceIds(), null, responseTypes, extensionProperties);
         org.springframework.security.core.userdetails.User userPrincipal = new org.springframework.security.core.userdetails.User(userDetails.getUsername(), userDetails.getPassword(), userDetails.isEnabled(), userDetails.isAccountNonExpired(), userDetails.isCredentialsNonExpired(), userDetails.isAccountNonLocked(), userDetails.getAuthorities());
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userPrincipal, null, userDetails.getAuthorities());
         OAuth2Authentication auth = new OAuth2Authentication(oAuth2Request, authenticationToken);
