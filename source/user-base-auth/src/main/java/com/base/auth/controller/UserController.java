@@ -21,7 +21,6 @@ import com.base.auth.model.Group;
 import com.base.auth.model.User;
 import com.base.auth.model.criteria.UserCriteria;
 import com.base.auth.repository.*;
-import com.base.auth.service.FaceBookService;
 import com.base.auth.service.MFAService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -65,9 +64,6 @@ public class UserController extends ABasicController{
 
     @Autowired
     private MFAService mfaService;
-
-    @Autowired
-    private FaceBookService faceBookService;
 
     @PostMapping(value = "/signup", produces= MediaType.APPLICATION_JSON_VALUE)
     public ApiMessageDto<String> create(@Valid @RequestBody SignUpUserForm signUpUserForm, BindingResult bindingResult)
