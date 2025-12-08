@@ -41,6 +41,8 @@ public class CustomTokenEnhancer implements TokenEnhancer {
             if(grantType.equals(SecurityConstant.GRANT_TYPE_USER) ){
                 String phone = authentication.getOAuth2Request().getRequestParameters().get("phone");
                 additionalInfo = getAdditionalUserInfo(phone, grantType);
+            } else if (grantType.equals(SecurityConstant.GRANT_TYPE_FACEBOOK)){
+                additionalInfo = getAdditionalInfo(username, grantType);
             }
         }
         ((DefaultOAuth2AccessToken) accessToken).setAdditionalInformation(additionalInfo);
