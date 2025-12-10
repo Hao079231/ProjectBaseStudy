@@ -1,5 +1,6 @@
 package com.base.auth.controller;
 
+import com.base.auth.constant.UserBaseConstant;
 import com.base.auth.dto.ApiMessageDto;
 import com.base.auth.dto.ResponseListDto;
 import com.base.auth.dto.product.ProductDto;
@@ -12,6 +13,7 @@ import com.base.auth.model.Product;
 import com.base.auth.model.criteria.ProductCriteria;
 import com.base.auth.repository.CategoryRepository;
 import com.base.auth.repository.ProductRepository;
+import com.base.auth.service.SyncService;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -45,16 +47,20 @@ public class ProductController extends ABasicController{
   @Autowired
   CategoryRepository categoryRepository;
 
+  @Autowired
+  SyncService syncService;
+
   @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasRole('PR_C')")
   public ApiMessageDto<String> create(@Valid @RequestBody CreateProductForm createProductForm, BindingResult bindingResult){
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
     Category category = categoryRepository.findById(createProductForm.getCategoryId()).orElse(null);
     Product product = productMapper.fromCreateProductFormToEntity(createProductForm);
-    Double finalPrice = createProductForm.getPrice() * (createProductForm.getDiscount() / 100);
+    Double finalPrice = createProductForm.getPrice() - (createProductForm.getPrice() * (createProductForm.getDiscount() / 100));
     product.setFinalPrice(finalPrice);
     product.setCategory(category);
-    productRepository.save(product);
+    Product savedProduct = productRepository.saveAndFlush(product);
+    syncService.syncAndLogFailure(UserBaseConstant.SYNC_ENTITY_PRODUCT, UserBaseConstant.SYNC_TYPE_INSERT, savedProduct);
     apiMessageDto.setMessage("Create product success");
     return apiMessageDto;
   }
@@ -80,8 +86,11 @@ public class ProductController extends ABasicController{
     Product product = productRepository.findById(updateProductForm.getId()).orElse(null);
     Category category = categoryRepository.findById(updateProductForm.getCategoryId()).orElse(null);
     productMapper.fromUpdateProductFormToEntity(updateProductForm, product);
+    Double finalPrice = updateProductForm.getPrice() - (updateProductForm.getPrice() * (updateProductForm.getDiscount() / 100));
+    product.setFinalPrice(finalPrice);
     product.setCategory(category);
     productRepository.save(product);
+    syncService.syncAndLogFailure(UserBaseConstant.SYNC_ENTITY_PRODUCT, UserBaseConstant.SYNC_TYPE_UPDATE, product);
     apiMessageDto.setMessage("Update product success");
     return apiMessageDto;
   }
@@ -92,6 +101,7 @@ public class ProductController extends ABasicController{
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
     Product product = productRepository.findById(id).orElse(null);
     productRepository.delete(product);
+    syncService.syncAndLogFailure(UserBaseConstant.SYNC_ENTITY_PRODUCT, UserBaseConstant.SYNC_TYPE_DELETE, product);
     apiMessageDto.setMessage("Delete product success");
     return apiMessageDto;
   }
