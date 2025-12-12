@@ -54,20 +54,6 @@ public class SyncApiHandler {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 
-    try {
-      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      if (authentication != null && authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
-        OAuth2AuthenticationDetails oauthDetails = (OAuth2AuthenticationDetails) authentication.getDetails();
-        String token = oauthDetails.getTokenValue();
-
-        if (token != null && !token.isEmpty()) {
-          headers.setBearerAuth(token);
-        }
-      }
-    } catch (Exception e) {
-      log.error("====> SYNC HEADER Error getting token from SecurityContext: {}", e.getMessage(), e);
-    }
-
     return headers;
   }
 }

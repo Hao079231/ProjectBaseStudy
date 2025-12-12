@@ -39,6 +39,7 @@ public class SyncService {
 
   public void retrySync(SyncLog syncLog) {
     try {
+      syncLog.setRetryCount(syncLog.getRetryCount() + 1);
       SyncNotificationDto response = syncApiHandler.notifySync(
           syncLog.getEntity(),
           syncLog.getType(),
@@ -49,7 +50,6 @@ public class SyncService {
         log.info("===> SYNC RETRY SUCCESS: id={}, retry={} - Deleting SyncLog", syncLog.getId(), syncLog.getRetryCount());
         syncLogRepository.delete(syncLog);
       } else {
-        syncLog.setRetryCount(syncLog.getRetryCount() + 1);
         syncLogRepository.save(syncLog);
       }
 
