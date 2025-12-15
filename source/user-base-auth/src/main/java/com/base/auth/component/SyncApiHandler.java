@@ -10,9 +10,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -29,7 +26,9 @@ public class SyncApiHandler {
     String url = newProjectUrl + "/v1/sync/process";
     log.info("===> SYNC REQUEST - Calling Project B: {} for entity: {}, type: {}",
         url, entity, type);
-    HttpHeaders headers = createHeadersWithBearerToken();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
     DataSyncRequestForm request = new DataSyncRequestForm();
     request.setEntity(entity);
     request.setPayload(payload);
@@ -48,12 +47,5 @@ public class SyncApiHandler {
       errorResponse.setMessage("Sync error");
       return errorResponse;
     }
-  }
-
-  private HttpHeaders createHeadersWithBearerToken() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-
-    return headers;
   }
 }

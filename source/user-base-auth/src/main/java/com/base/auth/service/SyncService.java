@@ -1,13 +1,13 @@
 package com.base.auth.service;
 
 import com.base.auth.component.SyncApiHandler;
-import com.base.auth.constant.UserBaseConstant;
 import com.base.auth.dto.sync.SyncNotificationDto;
 import com.base.auth.model.SyncLog;
+import com.base.auth.model.Syncable;
 import com.base.auth.repository.SyncLogRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,27 +19,26 @@ public class SyncService {
   @Autowired
   SyncApiHandler syncApiHandler;
 
-  @Autowired
-  ObjectMapper objectMapper;
-
-  public void syncAndLogFailure(String entity, String type, Object data){
+  @Async // Chạy trong thread pool riêng, không chặn request truyền vào
+  public void saveSyncLog(Syncable<?> entity, String type) {
     try {
-      String payload = objectMapper.writeValueAsString(data);
-      SyncNotificationDto response = syncApiHandler.notifySync(entity, type, payload);
-      if (response.isResult()){
-        log.info("====> SYNC SUCCESS");
-      } else {
-        log.warn("====> SYNC FAILED entity={}, type={}, error={}", entity, type, response.getMessage());
-        createSyncLogFailure(entity, type, payload);
-      }
+      SyncLog syncLog = new SyncLog();
+      syncLog.setEntity(entity.getEntityName());
+      syncLog.setType(type);
+
+      String payloadString = entity.toPayloadString(); // Chuyển Object thành String để dễ lưu vào DB, dễ đọc và có thể truyền đi JSON sang source đồng bộ
+      syncLog.setPayload(payloadString); // Dữ liệu sẽ được lưu vào DB
+      syncLogRepository.save(syncLog);
+      log.info("Saved sync log for entity: {}, type: {}, payload: {}",
+          entity.getEntityName(), type, payloadString);
     } catch (Exception e) {
-      log.error("====> SYNC FAILED: ", e);
+      log.error("Error saving sync log for entity: {}, type: {}",
+          entity.getEntityName(), type, e);
     }
   }
 
-  public void retrySync(SyncLog syncLog) {
-    try {
-      syncLog.setRetryCount(syncLog.getRetryCount() + 1);
+  public void callSync(SyncLog syncLog) {
+    try{
       SyncNotificationDto response = syncApiHandler.notifySync(
           syncLog.getEntity(),
           syncLog.getType(),
@@ -47,22 +46,16 @@ public class SyncService {
       );
 
       if (response.isResult()) {
-        log.info("===> SYNC RETRY SUCCESS: id={}, retry={} - Deleting SyncLog", syncLog.getId(), syncLog.getRetryCount());
+        log.info("===> SYNC RETRY SUCCESS");
         syncLogRepository.delete(syncLog);
       } else {
+        syncLog.setRetryCount(syncLog.getRetryCount() + 1);
         syncLogRepository.save(syncLog);
       }
-
-    } catch (Exception e) {
-      log.error("===> SYNC RETRY EXCEPTION: id={}, retry={}", syncLog.getId(), syncLog.getRetryCount(), e);
-    }
-  }
-
-  private void createSyncLogFailure(String entity, String type, String payload){
-      SyncLog syncLog = new SyncLog();
-      syncLog.setEntity(entity);
-      syncLog.setType(type);
-      syncLog.setPayload(payload);
+    } catch (Exception e){
+      log.error("===> SYNC ERROR: {}", e.getMessage());
+      syncLog.setRetryCount(syncLog.getRetryCount() + 1);
       syncLogRepository.save(syncLog);
+    }
   }
 }

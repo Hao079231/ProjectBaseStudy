@@ -26,5 +26,5 @@ public class SyncLog extends Auditable<String>{
   private String type;
   @Column(columnDefinition = "TEXT")
   private String payload;
-  private Integer retryCount = 1;
+  private Integer retryCount = 0;
 }

@@ -1,10 +1,8 @@
 package com.base.auth.controller;
 
-import com.base.auth.constant.UserBaseConstant;
 import com.base.auth.dto.ApiMessageDto;
 import com.base.auth.dto.ResponseListDto;
 import com.base.auth.dto.product.ProductDto;
-import com.base.auth.exception.NotFoundException;
 import com.base.auth.form.product.CreateProductForm;
 import com.base.auth.form.product.UpdateProductForm;
 import com.base.auth.mapper.ProductMapper;
@@ -59,8 +57,7 @@ public class ProductController extends ABasicController{
     Double finalPrice = createProductForm.getPrice() - (createProductForm.getPrice() * (createProductForm.getDiscount() / 100));
     product.setFinalPrice(finalPrice);
     product.setCategory(category);
-    Product savedProduct = productRepository.saveAndFlush(product);
-    syncService.syncAndLogFailure(UserBaseConstant.SYNC_ENTITY_PRODUCT, UserBaseConstant.SYNC_TYPE_INSERT, savedProduct);
+    productRepository.save(product);
     apiMessageDto.setMessage("Create product success");
     return apiMessageDto;
   }
@@ -90,7 +87,6 @@ public class ProductController extends ABasicController{
     product.setFinalPrice(finalPrice);
     product.setCategory(category);
     productRepository.save(product);
-    syncService.syncAndLogFailure(UserBaseConstant.SYNC_ENTITY_PRODUCT, UserBaseConstant.SYNC_TYPE_UPDATE, product);
     apiMessageDto.setMessage("Update product success");
     return apiMessageDto;
   }
@@ -101,7 +97,6 @@ public class ProductController extends ABasicController{
     ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
     Product product = productRepository.findById(id).orElse(null);
     productRepository.delete(product);
-    syncService.syncAndLogFailure(UserBaseConstant.SYNC_ENTITY_PRODUCT, UserBaseConstant.SYNC_TYPE_DELETE, product);
     apiMessageDto.setMessage("Delete product success");
     return apiMessageDto;
   }

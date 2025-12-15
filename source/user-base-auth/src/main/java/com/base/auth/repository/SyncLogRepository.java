@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface SyncLogRepository extends JpaRepository<SyncLog, Long>, JpaSpecificationExecutor<SyncLog> {
 
-  @Query(value = "SELECT * FROM db_sync_log WHERE retry_count < 5 ORDER BY created_date ASC LIMIT 1", nativeQuery = true)
+  @Query(value = "SELECT * FROM db_sync_log WHERE retry_count <= 5 ORDER BY created_date ASC LIMIT 1", nativeQuery = true)
   Optional<SyncLog> findOldestFailedSyncForRetry();
 
   @Transactional

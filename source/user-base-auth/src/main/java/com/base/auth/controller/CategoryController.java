@@ -100,8 +100,7 @@ public class CategoryController extends ABasicController {
     @PreAuthorize("hasRole('CA_C')")
     public ApiMessageDto<String> createCategory(@Valid @RequestBody CreateCategoryForm createCategoryForm, BindingResult bindingResult) {
         ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-        Category category = categoryRepository.saveAndFlush(categoryMapper.fromCreateCategory(createCategoryForm));
-        syncService.syncAndLogFailure(UserBaseConstant.SYNC_ENTITY_CATEGORY, UserBaseConstant.SYNC_TYPE_INSERT, category);
+        categoryRepository.save(categoryMapper.fromCreateCategory(createCategoryForm));
         apiMessageDto.setMessage("Create category success");
         return apiMessageDto;
     }

@@ -22,7 +22,7 @@ public class SyncScheduler {
   @Scheduled(fixedDelay = 5000, initialDelay = 10000)
   public void retryFailedSync() {
     try {
-      // Lấy 1 dòng cũ nhất có retryCount < 5
+      // Lấy 1 dòng dữ liệu được tạo sớm nhất và có retry count <= 5
       Optional<SyncLog> optionalSyncLog = syncLogRepository.findOldestFailedSyncForRetry();
       if (optionalSyncLog.isPresent()) {
         SyncLog syncLog = optionalSyncLog.get();
@@ -32,7 +32,8 @@ public class SyncScheduler {
             syncLog.getType(),
             syncLog.getRetryCount(),
             UserBaseConstant.SYNC_MAX_RETRY);
-        syncService.retrySync(syncLog);
+
+        syncService.callSync(syncLog);
       }
     } catch (Exception e) {
       log.error("===> SCHEDULER Error: ", e);
