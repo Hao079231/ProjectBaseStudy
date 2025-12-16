@@ -18,7 +18,6 @@ public interface SyncLogMapper {
   @Mapping(source = "entity", target = "entity")
   @Mapping(source = "type", target = "type")
   @Mapping(source = "payload", target = "payload")
-  @Mapping(source = "retryCount", target = "retryCount")
   @Mapping(source = "createdDate", target = "createdDate")
   @Mapping(source = "modifiedDate", target = "modifiedDate")
   @BeanMapping(ignoreByDefault = true)

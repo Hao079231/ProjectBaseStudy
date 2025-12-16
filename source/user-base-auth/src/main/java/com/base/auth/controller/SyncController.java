@@ -8,7 +8,6 @@ import com.base.auth.model.SyncLog;
 import com.base.auth.model.criteria.SyncLogCriteria;
 import com.base.auth.repository.SyncLogRepository;
 import java.util.List;
-import javax.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,15 +42,6 @@ public class SyncController {
     responseListDto.setTotalPages(syncLogs.getTotalPages());
     apiMessageDto.setData(responseListDto);
     apiMessageDto.setMessage("Get list sync log success");
-    return apiMessageDto;
-  }
-
-  @PutMapping(value = "/retry", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasRole('SY_RT')")
-  public ApiMessageDto<String> resetRetryCount(){
-    ApiMessageDto<String> apiMessageDto = new ApiMessageDto<>();
-    syncLogRepository.resetAllRetryCount();
-    apiMessageDto.setMessage("Retry sync log success");
     return apiMessageDto;
   }
 }

@@ -41,6 +41,9 @@ public class UserBaseConstant {
     public static final String SYNC_ENTITY_PRODUCT = "PRODUCT";
     public static final String SYNC_ENTITY_CATEGORY = "CATEGORY";
 
+    public static final Integer SYNC_STATUS_SUCCESS = 1;
+    public static final Integer SYNC_STATUS_PROGRESS = 0;
+
     public static final Integer SYNC_MAX_RETRY = 5;
 
     private UserBaseConstant(){

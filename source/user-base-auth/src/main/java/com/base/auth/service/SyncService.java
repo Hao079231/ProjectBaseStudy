@@ -1,6 +1,7 @@
 package com.base.auth.service;
 
 import com.base.auth.component.SyncApiHandler;
+import com.base.auth.constant.UserBaseConstant;
 import com.base.auth.dto.sync.SyncNotificationDto;
 import com.base.auth.model.SyncLog;
 import com.base.auth.model.Syncable;
@@ -28,6 +29,7 @@ public class SyncService {
 
       String payloadString = entity.toPayloadString(); // Chuyển Object thành String để dễ lưu vào DB, dễ đọc và có thể truyền đi JSON sang source đồng bộ
       syncLog.setPayload(payloadString); // Dữ liệu sẽ được lưu vào DB
+      syncLog.setStatus(UserBaseConstant.SYNC_STATUS_PROGRESS);
       syncLogRepository.save(syncLog);
       log.info("Saved sync log for entity: {}, type: {}, payload: {}",
           entity.getEntityName(), type, payloadString);
@@ -40,22 +42,21 @@ public class SyncService {
   public void callSync(SyncLog syncLog) {
     try{
       SyncNotificationDto response = syncApiHandler.notifySync(
+          syncLog.getId(),
           syncLog.getEntity(),
           syncLog.getType(),
           syncLog.getPayload()
       );
 
       if (response.isResult()) {
-        log.info("===> SYNC RETRY SUCCESS");
-        syncLogRepository.delete(syncLog);
-      } else {
-        syncLog.setRetryCount(syncLog.getRetryCount() + 1);
+        log.info("===> SYNC CALL SUCCESS");
+        syncLog.setStatus(UserBaseConstant.SYNC_STATUS_SUCCESS);
         syncLogRepository.save(syncLog);
+      } else {
+        log.info("===> SYNC CALL ERROR");
       }
     } catch (Exception e){
       log.error("===> SYNC ERROR: {}", e.getMessage());
-      syncLog.setRetryCount(syncLog.getRetryCount() + 1);
-      syncLogRepository.save(syncLog);
     }
   }
 }

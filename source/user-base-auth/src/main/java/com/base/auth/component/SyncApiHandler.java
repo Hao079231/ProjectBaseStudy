@@ -22,7 +22,7 @@ public class SyncApiHandler {
   @Value("${sync.new.project.url}")
   String newProjectUrl;
 
-  public SyncNotificationDto notifySync(String entity, String type, String payload){
+  public SyncNotificationDto notifySync(Long syncLogId, String entity, String type, String payload){
     String url = newProjectUrl + "/v1/sync/process";
     log.info("===> SYNC REQUEST - Calling Project B: {} for entity: {}, type: {}",
         url, entity, type);
@@ -30,6 +30,7 @@ public class SyncApiHandler {
     headers.setContentType(MediaType.APPLICATION_JSON);
 
     DataSyncRequestForm request = new DataSyncRequestForm();
+    request.setSyncLogId(syncLogId);
     request.setEntity(entity);
     request.setPayload(payload);
     request.setType(type);
