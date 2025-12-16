@@ -17,6 +17,7 @@ import com.base.auth.model.News;
 import com.base.auth.model.criteria.CategoryCriteria;
 import com.base.auth.repository.CategoryRepository;
 import com.base.auth.repository.NewsRepository;
+import com.base.auth.service.SyncService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -45,6 +46,9 @@ public class CategoryController extends ABasicController {
 
     @Autowired
     NewsRepository newsRepository;
+
+    @Autowired
+    SyncService syncService;
 
 
     @GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
